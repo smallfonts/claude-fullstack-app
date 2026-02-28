@@ -108,7 +108,7 @@ async function syncArtifacts() {
   syncing.value = true
   error.value = ''
   try {
-    const { data } = await udeployService.syncArtifacts(form.value.applicationName)
+    const { data } = await udeployService.syncArtifacts(form.value.applicationName, form.value.requestedByUserId)
     artifacts.value = data
   } catch (e) {
     error.value = 'Failed to sync artifacts from uDeploy. Check application name and uDeploy config.'

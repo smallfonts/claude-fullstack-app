@@ -12,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.SSLException;
-import java.util.Base64;
 
 @Configuration
 @RequiredArgsConstructor
@@ -35,12 +34,8 @@ public class UDeployWebClientConfig {
             httpClient = HttpClient.create();
         }
 
-        // uDeploy uses token-based auth via Authorization header
-        String authHeader = "Bearer " + uDeployProperties.getAuthToken();
-
         return WebClient.builder()
                 .baseUrl(uDeployProperties.getBaseUrl())
-                .defaultHeader("Authorization", authHeader)
                 .defaultHeader("Accept", "application/json")
                 .defaultHeader("Content-Type", "application/json")
                 .clientConnector(new ReactorClientHttpConnector(httpClient))

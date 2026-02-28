@@ -95,9 +95,9 @@ public class DeploymentRequestService {
             request.setStatus(DeploymentStatus.APPROVED);
             log.info("Deployment request {} approved by {}", requestId, approver.getUsername());
 
-            // If method is uDeploy, trigger immediately after approval
+            // If method is uDeploy, trigger immediately after approval using approver's token
             if (request.getDeploymentMethod().getType() == DeploymentMethodType.UDEPLOY_PROCESS) {
-                triggerUDeployDeployment(request);
+                triggerUDeployDeployment(request, approver.getUdeployAuthToken());
             }
         } else {
             request.setStatus(DeploymentStatus.REJECTED);
@@ -123,11 +123,11 @@ public class DeploymentRequestService {
             throw new IllegalStateException("Only APPROVED requests can be triggered.");
         }
 
-        triggerUDeployDeployment(request);
+        triggerUDeployDeployment(request, user.getUdeployAuthToken());
         return toDTO(deploymentRequestRepository.save(request));
     }
 
-    private void triggerUDeployDeployment(DeploymentRequest request) {
+    private void triggerUDeployDeployment(DeploymentRequest request, String authToken) {
         try {
             request.setStatus(DeploymentStatus.IN_PROGRESS);
             ComponentArtifact artifact = request.getComponentArtifact();
@@ -137,7 +137,8 @@ public class DeploymentRequestService {
                     request.getApplicationName(),
                     method.getProcessIdentifier(),
                     method.getTargetEnvironment(),
-                    Map.of(artifact.getComponentName(), artifact.getArtifactVersion())
+                    Map.of(artifact.getComponentName(), artifact.getArtifactVersion()),
+                    authToken
             );
 
             request.setUdeployRequestId(udeployRequestId);

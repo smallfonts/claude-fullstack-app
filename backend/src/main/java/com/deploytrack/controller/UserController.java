@@ -44,6 +44,7 @@ public class UserController {
                 .email(request.email())
                 .passwordHash(request.passwordHash())
                 .roles(request.roles())
+                .udeployAuthToken(request.udeployAuthToken())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(userRepository.save(user)));
     }
@@ -59,6 +60,9 @@ public class UserController {
             user.setFullName(request.fullName());
             user.setEmail(request.email());
             user.setRoles(request.roles());
+            if (request.udeployAuthToken() != null && !request.udeployAuthToken().isBlank()) {
+                user.setUdeployAuthToken(request.udeployAuthToken());
+            }
             return ResponseEntity.ok(toDTO(userRepository.save(user)));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -85,12 +89,14 @@ public class UserController {
             String fullName,
             String email,
             String passwordHash,
-            Set<UserRole> roles
+            Set<UserRole> roles,
+            String udeployAuthToken
     ) {}
 
     public record UpdateUserRequest(
             String fullName,
             String email,
-            Set<UserRole> roles
+            Set<UserRole> roles,
+            String udeployAuthToken
     ) {}
 }
