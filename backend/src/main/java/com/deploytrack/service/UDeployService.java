@@ -27,11 +27,12 @@ public class UDeployService {
      * Fetches the list of components for a given application from uDeploy.
      */
     @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> getApplicationComponents(String applicationName) {
+    public List<Map<String, Object>> getApplicationComponents(String applicationName, String authToken) {
         log.info("Fetching components for application: {}", applicationName);
         try {
             List<Map<String, Object>> components = udeployWebClient.get()
                     .uri("/rest/deploy/application/{name}/components", applicationName)
+                    .header("Authorization", "Bearer " + authToken)
                     .retrieve()
                     .bodyToMono(List.class)
                     .block();
@@ -46,11 +47,12 @@ public class UDeployService {
      * Fetches all versions (artifacts) for a given component from uDeploy.
      */
     @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> getComponentVersions(String componentId) {
+    public List<Map<String, Object>> getComponentVersions(String componentId, String authToken) {
         log.info("Fetching versions for component: {}", componentId);
         try {
             List<Map<String, Object>> versions = udeployWebClient.get()
                     .uri("/rest/deploy/component/{id}/versions/false", componentId)
+                    .header("Authorization", "Bearer " + authToken)
                     .retrieve()
                     .bodyToMono(List.class)
                     .block();
@@ -65,16 +67,16 @@ public class UDeployService {
      * Syncs component artifacts from uDeploy into the local database for a given application.
      */
     @SuppressWarnings("unchecked")
-    public List<ComponentArtifact> syncArtifactsForApplication(String applicationName) {
+    public List<ComponentArtifact> syncArtifactsForApplication(String applicationName, String authToken) {
         log.info("Syncing artifacts for application: {}", applicationName);
-        List<Map<String, Object>> components = getApplicationComponents(applicationName);
+        List<Map<String, Object>> components = getApplicationComponents(applicationName, authToken);
         List<ComponentArtifact> synced = new ArrayList<>();
 
         for (Map<String, Object> component : components) {
             String componentId = (String) component.get("id");
             String componentName = (String) component.get("name");
 
-            List<Map<String, Object>> versions = getComponentVersions(componentId);
+            List<Map<String, Object>> versions = getComponentVersions(componentId, authToken);
             for (Map<String, Object> version : versions) {
                 String versionId = (String) version.get("id");
                 String versionName = (String) version.get("name");
@@ -111,7 +113,8 @@ public class UDeployService {
     public String triggerDeployment(String applicationName,
                                     String applicationProcess,
                                     String environmentName,
-                                    Map<String, String> componentVersions) {
+                                    Map<String, String> componentVersions,
+                                    String authToken) {
         log.info("Triggering uDeploy deployment: app={}, process={}, env={}",
                 applicationName, applicationProcess, environmentName);
 
@@ -126,6 +129,7 @@ public class UDeployService {
         try {
             Map<String, Object> response = udeployWebClient.put()
                     .uri("/rest/deploy/application/request")
+                    .header("Authorization", "Bearer " + authToken)
                     .bodyValue(payload)
                     .retrieve()
                     .bodyToMono(Map.class)
@@ -147,10 +151,11 @@ public class UDeployService {
      * Gets the status of an existing uDeploy deployment request.
      */
     @SuppressWarnings("unchecked")
-    public String getDeploymentStatus(String udeployRequestId) {
+    public String getDeploymentStatus(String udeployRequestId, String authToken) {
         try {
             Map<String, Object> response = udeployWebClient.get()
                     .uri("/rest/deploy/application/request/{id}", udeployRequestId)
+                    .header("Authorization", "Bearer " + authToken)
                     .retrieve()
                     .bodyToMono(Map.class)
                     .block();

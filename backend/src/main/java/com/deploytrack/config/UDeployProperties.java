@@ -9,6 +9,5 @@ import org.springframework.stereotype.Component;
 @Data
 public class UDeployProperties {
     private String baseUrl;
-    private String authToken;
     private boolean sslVerify = true;
 }

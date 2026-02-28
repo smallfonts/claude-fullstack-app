@@ -75,6 +75,12 @@
         </div>
 
         <div class="form-group">
+          <label>uDeploy Auth Token</label>
+          <input v-model="form.udeployAuthToken" type="password" class="form-input"
+            :placeholder="editingUser ? 'Leave blank to keep existing token' : 'uDeploy personal access token'" />
+        </div>
+
+        <div class="form-group">
           <label>Roles</label>
           <div class="roles-checkboxes">
             <label v-for="r in allRoles" :key="r" class="checkbox-label">
@@ -117,6 +123,7 @@ const form = ref({
   fullName: '',
   email: '',
   passwordHash: '',
+  udeployAuthToken: '',
   roles: []
 })
 
@@ -137,14 +144,14 @@ async function loadUsers() {
 
 function openCreateForm() {
   editingUser.value = null
-  form.value = { username: '', fullName: '', email: '', passwordHash: '', roles: [] }
+  form.value = { username: '', fullName: '', email: '', passwordHash: '', udeployAuthToken: '', roles: [] }
   saveError.value = ''
   showForm.value = true
 }
 
 function openEditForm(u) {
   editingUser.value = u
-  form.value = { username: u.username, fullName: u.fullName, email: u.email, passwordHash: '', roles: [...(u.roles || [])] }
+  form.value = { username: u.username, fullName: u.fullName, email: u.email, passwordHash: '', udeployAuthToken: '', roles: [...(u.roles || [])] }
   saveError.value = ''
   showForm.value = true
 }
@@ -162,7 +169,8 @@ async function saveUser() {
       const { data } = await userService.update(editingUser.value.id, {
         fullName: form.value.fullName,
         email: form.value.email,
-        roles: form.value.roles
+        roles: form.value.roles,
+        udeployAuthToken: form.value.udeployAuthToken
       })
       const idx = users.value.findIndex(u => u.id === editingUser.value.id)
       if (idx !== -1) users.value[idx] = data
@@ -172,7 +180,8 @@ async function saveUser() {
         fullName: form.value.fullName,
         email: form.value.email,
         passwordHash: form.value.passwordHash,
-        roles: form.value.roles
+        roles: form.value.roles,
+        udeployAuthToken: form.value.udeployAuthToken
       })
       users.value.push(data)
     }

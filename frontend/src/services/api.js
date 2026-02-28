@@ -24,17 +24,17 @@ export const deploymentRequestService = {
 
 // ---- uDeploy Integration ----
 export const udeployService = {
-  getComponents: (applicationName) =>
-    api.get(`/udeploy/applications/${applicationName}/components`),
+  getComponents: (applicationName, userId) =>
+    api.get(`/udeploy/applications/${applicationName}/components`, { params: { userId } }),
 
-  getVersions: (componentId) =>
-    api.get(`/udeploy/components/${componentId}/versions`),
+  getVersions: (componentId, userId) =>
+    api.get(`/udeploy/components/${componentId}/versions`, { params: { userId } }),
 
-  syncArtifacts: (applicationName) =>
-    api.post(`/udeploy/applications/${applicationName}/sync`),
+  syncArtifacts: (applicationName, userId) =>
+    api.post(`/udeploy/applications/${applicationName}/sync`, null, { params: { userId } }),
 
-  getDeploymentStatus: (udeployRequestId) =>
-    api.get(`/udeploy/requests/${udeployRequestId}/status`)
+  getDeploymentStatus: (udeployRequestId, userId) =>
+    api.get(`/udeploy/requests/${udeployRequestId}/status`, { params: { userId } })
 }
 
 // ---- Users ----
