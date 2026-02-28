@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,17 +43,31 @@ public class UserController {
                 .fullName(request.fullName())
                 .email(request.email())
                 .passwordHash(request.passwordHash())
-                .role(request.role())
+                .roles(request.roles())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(userRepository.save(user)));
     }
 
-    @PatchMapping("/{id}/role")
-    public ResponseEntity<UserDTO> updateRole(@PathVariable Long id, @RequestParam UserRole role) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> update(@PathVariable Long id,
+                                           @Valid @RequestBody UpdateUserRequest request) {
         return userRepository.findById(id).map(user -> {
-            user.setRole(role);
+            if (!user.getEmail().equals(request.email())
+                    && userRepository.existsByEmail(request.email())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).<UserDTO>build();
+            }
+            user.setFullName(request.fullName());
+            user.setEmail(request.email());
+            user.setRoles(request.roles());
             return ResponseEntity.ok(toDTO(userRepository.save(user)));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (!userRepository.existsById(id)) return ResponseEntity.notFound().build();
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     private UserDTO toDTO(User u) {
@@ -61,7 +76,7 @@ public class UserController {
         dto.setUsername(u.getUsername());
         dto.setFullName(u.getFullName());
         dto.setEmail(u.getEmail());
-        dto.setRole(u.getRole());
+        dto.setRoles(u.getRoles());
         return dto;
     }
 
@@ -70,6 +85,12 @@ public class UserController {
             String fullName,
             String email,
             String passwordHash,
-            UserRole role
+            Set<UserRole> roles
+    ) {}
+
+    public record UpdateUserRequest(
+            String fullName,
+            String email,
+            Set<UserRole> roles
     ) {}
 }

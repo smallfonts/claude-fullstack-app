@@ -38,7 +38,7 @@
           <label>Requested By</label>
           <select v-model="form.requestedByUserId" required class="form-input">
             <option value="" disabled>Select user</option>
-            <option v-for="u in users" :key="u.id" :value="u.id" :disabled="u.role === 'READ_ONLY'">
+            <option v-for="u in users" :key="u.id" :value="u.id" :disabled="u.roles?.every(r => r === 'READ_ONLY')">
               {{ u.fullName }} ({{ u.role }})
             </option>
           </select>
