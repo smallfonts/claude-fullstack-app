@@ -40,7 +40,10 @@ public class DeploymentRequestService {
         User requestor = userRepository.findById(dto.getRequestedByUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getRequestedByUserId()));
 
-        if (requestor.getRole() == UserRole.READ_ONLY) {
+        if (requestor.getRoles().stream().noneMatch(r ->
+                r == UserRole.DEPLOYMENT_REQUESTOR ||
+                r == UserRole.DEPLOYMENT_APPROVER ||
+                r == UserRole.ADMINISTRATOR)) {
             throw new IllegalStateException("Read-only users cannot create deployment requests.");
         }
 
@@ -76,7 +79,7 @@ public class DeploymentRequestService {
         User approver = userRepository.findById(dto.getActionedByUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + dto.getActionedByUserId()));
 
-        if (approver.getRole() != UserRole.DEPLOYMENT_APPROVER) {
+        if (!approver.getRoles().contains(UserRole.DEPLOYMENT_APPROVER)) {
             throw new IllegalStateException("Only DEPLOYMENT_APPROVER users can action requests.");
         }
 
@@ -112,7 +115,7 @@ public class DeploymentRequestService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        if (user.getRole() != UserRole.DEPLOYMENT_APPROVER) {
+        if (!user.getRoles().contains(UserRole.DEPLOYMENT_APPROVER)) {
             throw new IllegalStateException("Only DEPLOYMENT_APPROVER users can trigger deployments.");
         }
 
@@ -186,7 +189,7 @@ public class DeploymentRequestService {
             u.setId(r.getRequestedBy().getId());
             u.setUsername(r.getRequestedBy().getUsername());
             u.setFullName(r.getRequestedBy().getFullName());
-            u.setRole(r.getRequestedBy().getRole());
+            u.setRoles(r.getRequestedBy().getRoles());
             dto.setRequestedBy(u);
         }
         if (r.getActionedBy() != null) {
@@ -194,7 +197,7 @@ public class DeploymentRequestService {
             u.setId(r.getActionedBy().getId());
             u.setUsername(r.getActionedBy().getUsername());
             u.setFullName(r.getActionedBy().getFullName());
-            u.setRole(r.getActionedBy().getRole());
+            u.setRoles(r.getActionedBy().getRoles());
             dto.setActionedBy(u);
         }
         if (r.getComponentArtifact() != null) {

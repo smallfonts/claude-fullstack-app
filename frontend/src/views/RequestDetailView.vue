@@ -122,7 +122,7 @@ const id = computed(() => route.params.id)
 const req = computed(() => store.currentRequest)
 
 const users = ref([])
-const approvers = computed(() => users.value.filter(u => u.role === 'DEPLOYMENT_APPROVER'))
+const approvers = computed(() => users.value.filter(u => u.roles?.includes('DEPLOYMENT_APPROVER')))
 
 const actionForm = ref({ actionedByUserId: '', actionNotes: '', approved: null })
 const actioning = ref(false)

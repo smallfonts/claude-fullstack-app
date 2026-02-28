@@ -7,6 +7,7 @@
         <router-link to="/requests">Deployment Requests</router-link>
         <router-link to="/requests/new">New Request</router-link>
         <router-link to="/artifacts">Artifacts</router-link>
+        <router-link to="/users">User Management</router-link>
       </div>
     </nav>
     <main class="main-content">
